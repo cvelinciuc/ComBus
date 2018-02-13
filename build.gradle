@@ -1,5 +1,6 @@
 buildscript {
     ext.kotlin_version = '1.2.10'
+    ext.junit_version = '4.11'
 
     repositories {
         mavenCentral()
@@ -10,7 +11,7 @@ buildscript {
 }
 
 group 'com.vcristian'
-version '1.0'
+version '1.1'
 
 apply plugin: 'kotlin'
 
@@ -20,7 +21,7 @@ repositories {
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    testCompile "junit:junit:4.11"
+    testCompile "junit:junit:$junit_version"
 }
 
 compileKotlin {
