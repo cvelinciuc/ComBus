@@ -1,8 +1,7 @@
 package com.vcristian.combus
 
 import java.lang.ref.WeakReference
-import java.util.ArrayList
-
+import java.util.Collections
 
 class CommunicationBus {
   /**
@@ -13,20 +12,7 @@ class CommunicationBus {
    *
    * @author Cristian Velinciuc
    */
-  private val eventListenersRegistry = ArrayList<Triple<Class<*>, WeakReference<Any>, (Any) -> Unit>>(100)
-
-  /**
-   * Emits the given [eventObject] to all the available listeners available in the
-   * registry of invoked instance of [CommunicationBus]
-   *
-   * @author Cristian Velinciuc
-   *
-   * @param eventObject an instance of some [T] class that some listener is potentially expecting to receive
-   */
-  fun <T : Any> post(eventObject: T) {
-    cleanup()
-    eventListenersRegistry.filter { it.first == eventObject.javaClass }.forEach { it.third(eventObject) }
-  }
+  private val eventListenersRegistry = Collections.synchronizedList(mutableListOf<Triple<Class<*>, WeakReference<Any>, (Any) -> Unit>>())
 
   /**
    * Subscribes some [receiverObject] to executing a [listeningCallback] function
@@ -41,9 +27,42 @@ class CommunicationBus {
    * @param receiverObject the object that this listener will be bound to
    * @param listeningCallback a function to be triggered when a [T] type of object is received
    */
-  fun <T : Any> expect(eventClass: Class<T>, receiverObject: Any, listeningCallback: (T) -> Unit) {
+  @Synchronized
+  fun <T: Any> expect(eventClass: Class<T>, receiverObject: Any, listeningCallback: (T) -> Unit) {
     if (receiverObject is CommunicationBus) throw UnsupportedOperationException("InvalidReceiverException")
+
+    dismiss(eventClass, receiverObject)
     eventListenersRegistry.add(Triple(eventClass, WeakReference(receiverObject), listeningCallback as (Any) -> Unit))
+  }
+
+  /**
+   * Unsubscribes some [receiverObject] from receiving some [eventClass] objects and removes
+   * this subscription from the registry of invoked instance of [CommunicationBus]
+   *
+   * @author Cristian Velinciuc
+   *
+   * @param eventClass [T] type of object that potentially triggers this [receiverObject]'s listener
+   * @param receiverObject the object that potentially has a listener bound it
+   */
+  @Synchronized
+  fun <T: Any> dismiss(eventClass: Class<T>, receiverObject: Any) {
+    if (receiverObject is CommunicationBus) throw UnsupportedOperationException("InvalidReceiverException")
+
+    eventListenersRegistry.removeAll { it.first == eventClass && it.second.get() == receiverObject }
+  }
+
+  /**
+   * Emits the given [eventObject] to all the available listeners available in the
+   * registry of invoked instance of [CommunicationBus]
+   *
+   * @author Cristian Velinciuc
+   *
+   * @param eventObject an instance of some [T] class that some listener is potentially expecting to receive
+   */
+  @Synchronized
+  fun <T: Any> post(eventObject: T) {
+    cleanup()
+    eventListenersRegistry.filter { it.first == eventObject.javaClass }.forEach { it.third(eventObject) }
   }
 
   /**

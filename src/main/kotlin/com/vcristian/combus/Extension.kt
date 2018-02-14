@@ -20,6 +20,18 @@ fun <T: Any> Any.expect(eventClass: Class<T>, listeningCallback: (T) -> Unit) {
 }
 
 /**
+ * Unsubscribes some [receiverObject] from receiving some [eventClass] objects and removes
+ * this subscription from the registry of shared instance of [CommunicationBus]
+ *
+ * @author Cristian Velinciuc
+ *
+ * @param eventClass [T] type of object that potentially triggers this [receiverObject]'s listener
+ */
+fun <T: Any> Any.dismiss(eventClass: Class<T>) {
+  ComBus.dismiss(eventClass, this)
+}
+
+/**
  * Emits the given [eventObject] to all the available listeners available in the
  * registry of the shared instance of [CommunicationBus]
  *

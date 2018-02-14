@@ -7,10 +7,10 @@ ComBus aims to provide a simple mean for objects to communicate data. It is supp
 
 ![ComBus icon](/combus_icon.png)
 
-### What's [new](/CHANGELOG.md) in 1.1
+### What's [new](/CHANGELOG.md) in 1.2
 
- * Extension function to simplify access to the _expect_ and _post_ of the _"shared" instance_
- * Added documentation
+ * Listener removal feature
+ * Concurrent registry modification
 
 ### Initialize ComBus
 Initialization is as simple as creation of an instance of the _CommunicationBus_ class:
@@ -73,6 +73,26 @@ Usage example:
 post(SomeClass())
 ```
 
+### Removing a listener
+To stop an object's event listener from receiving new events, it is sufficient to call the _dismiss_ method with the following arguments:
+ * eventClass: Class<T\> - the event class, meant to indicate the type of object that potentially triggers object's event listener
+ * receiverObject: Any - reference to the object which that potentially has a listener bound it
+
+Usage example:
+```
+comBusInstance.dismiss(SomeClass::java.class, someObjectInstance)
+```
+When invoked, if a listener matching provided criteria exists, the callback function will immediately be removed from the registry **of the same instance of CommuncationBus**.
+
+An extension function is also available to ease the invokation of this method without an instance of _CommunicationBus_, and thus - removal of a listener from the registry of the _"shared" instance_ of _CommunicationBus_. 
+
+**Note:** An instance of _CommunicationBus_ cannot also be an event receiver, and thus, invoking _expect_ with such and object as a _receiverObject_ argument will throw an _UnsupportedOperationException_.
+
+Usage example:
+```
+someObjectInstance.dismiss(SomeClass::java.class)
+```
+
 ### Add dependency
 To get ComBus into your project:
 
@@ -94,9 +114,9 @@ dependencies {
 
 ### TODO
 - [x] A preliminary (POC) implementation of the _Event Bus_ mechanism
-- [ ] Listener removal feature
-- [ ] Concurrent listeners registry modification
-- [ ] Cover who library with proper tests
+- [x] Listener removal feature
+- [x] Concurrent listeners registry modification
+- [ ] Cover whole library with proper tests
 - [ ] Extra features?
 
 ### License

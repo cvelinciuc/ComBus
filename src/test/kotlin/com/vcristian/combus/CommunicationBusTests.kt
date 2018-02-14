@@ -1,15 +1,15 @@
 package com.vcristian.combus
 
 import org.junit.Test
-import com.vcristian.combus.CommunicationBus.Companion.instance as ComBus
+import kotlin.concurrent.thread
 
 
 class CommunicationBusTests {
   inner class Emittable(val emittedValue: Int)
   inner class Receiver(var value: Int)
-  inner class Emitter() {
+  inner class Emitter {
     fun emitEvent(emittedValue: Int) {
-      ComBus.post(Emittable(emittedValue))
+      post(Emittable(emittedValue))
     }
   }
 
@@ -25,14 +25,10 @@ class CommunicationBusTests {
 
     eventReceivers.forEach { eventReceiver ->
       eventReceiver?.let {
-        ComBus.expect(Emittable::class.java, eventReceiver) { receivedEmittable ->
+        eventReceiver.expect(Emittable::class.java) { receivedEmittable ->
           eventReceiver.value = receivedEmittable.emittedValue
         }
       }
-    }
-
-    expect(String::class.java) { receivedItem ->
-      println(receivedItem)
     }
 
     eventReceivers.indices.forEach { index ->
@@ -58,5 +54,75 @@ class CommunicationBusTests {
 
     assert(secondPassFirstHalfResults.all { it == -1 })
     assert(secondPassSecondHalfResults.all { it == expectedValuesAfterSecondPass })
+  }
+
+  @Test
+  fun `removing event listeners`() {
+    val receiversCount = 10
+    val eventReceivers = Array<Receiver?>(receiversCount, { Receiver(0) })
+
+    eventReceivers.forEach { eventReceiver ->
+      eventReceiver?.let {
+        eventReceiver.expect(Emittable::class.java) { receivedEmittable ->
+          eventReceiver.value = receivedEmittable.emittedValue
+        }
+      }
+    }
+
+    eventReceivers.forEachIndexed { index, eventReceiver ->
+      post(Emittable(index * index))
+      eventReceiver?.dismiss(Emittable::class.java)
+    }
+
+    val actualResults = eventReceivers.map { eventReceiver -> eventReceiver?.value }
+    val expectedResults = List(receiversCount, { index -> index * index })
+
+    assert(eventReceivers.indices.all { index -> actualResults[index] == expectedResults[index] })
+  }
+
+  @Test
+  fun `concurrent modification`() {
+    val receiversCount = 1000
+    val eventReceivers = Array<Receiver?>(receiversCount, { Receiver(0) })
+    var success = true
+
+    val subscriberThread = thread {
+      try {
+        eventReceivers.forEachIndexed { index, eventReceiver ->
+          eventReceiver?.expect(Emittable::class.java) {}
+        }
+      } catch (e: Exception) {
+        e.printStackTrace()
+        success = false
+      }
+    }
+
+    val unsubscriberThread = thread {
+      try {
+        eventReceivers.forEachIndexed { index, eventReceiver ->
+          eventReceiver?.dismiss(Emittable::class.java)
+        }
+      } catch (e: Exception) {
+        e.printStackTrace()
+        success = false
+      }
+    }
+
+    val emitterThread = thread {
+      try {
+        eventReceivers.forEachIndexed { index, eventReceiver ->
+          post(Emittable(index))
+        }
+      } catch (e: Exception) {
+        e.printStackTrace()
+        success = false
+      }
+    }
+
+    subscriberThread.join()
+    unsubscriberThread.join()
+    emitterThread.join()
+
+    assert(success)
   }
 }

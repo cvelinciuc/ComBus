@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.2.10'
+    ext.kotlin_version = '1.2.20'
     ext.junit_version = '4.11'
 
     repositories {
@@ -11,7 +11,7 @@ buildscript {
 }
 
 group 'com.vcristian'
-version '1.1'
+version '1.2'
 
 apply plugin: 'kotlin'
 
