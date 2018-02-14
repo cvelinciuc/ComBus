@@ -1,7 +1,7 @@
 # ComBus
 Inter-object, event-driven, communication framework.
 
-[![Release](https://jitpack.io/v/msacras/CommunicationBus.svg)](https://jitpack.io/#msacras/CommunicationBus)
+[![Release](https://jitpack.io/v/msacras/ComBus.svg)](https://jitpack.io/#msacras/ComBus)
 
 ComBus aims to provide a simple mean for objects to communicate data. It is supposed to be an effortless mechanism of triggering custom events and reacting to them. This was designed to be a lightweight alternative to Rx frameworks with no extra dependencies.
 
