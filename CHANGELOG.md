@@ -1,5 +1,9 @@
 # Change Log
 
+### Version 1.3 *(18-02-2018)*
+Improvements:
+ * Added listener removal for the whole receiver object
+
 ### Version 1.2 *(14-02-2018)*
 Improvements:
  * Added listener removal method and extension function

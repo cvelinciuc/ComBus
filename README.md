@@ -7,10 +7,8 @@ ComBus aims to provide a simple mean for objects to communicate data. It is supp
 
 ![ComBus icon](/combus_icon.png)
 
-### What's [new](/CHANGELOG.md) in 1.2
-
- * Listener removal feature
- * Concurrent registry modification
+### What's [new](/CHANGELOG.md) in 1.3
+ * Added listener removal for the whole receiver object
 
 ### Initialize ComBus
 Initialization is as simple as creation of an instance of the _CommunicationBus_ class:

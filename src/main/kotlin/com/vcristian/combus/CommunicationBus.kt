@@ -52,6 +52,21 @@ class CommunicationBus {
   }
 
   /**
+   * Unsubscribes some [receiverObject] from receiving any events and removes
+   * it's subscriptions from the registry of invoked instance of [CommunicationBus]
+   *
+   * @author Cristian Velinciuc
+   *
+   * @param receiverObject the object that potentially has a listener bound it
+   */
+  @Synchronized
+  fun dismiss(receiverObject: Any) {
+    if (receiverObject is CommunicationBus) throw UnsupportedOperationException("InvalidReceiverException")
+
+    eventListenersRegistry.removeAll { it.second.get() == receiverObject }
+  }
+
+  /**
    * Emits the given [eventObject] to all the available listeners available in the
    * registry of invoked instance of [CommunicationBus]
    *
@@ -65,11 +80,22 @@ class CommunicationBus {
     eventListenersRegistry.filter { it.first == eventObject.javaClass }.forEach { it.third(eventObject) }
   }
 
+  @Synchronized
+  fun list(receiverObject: Any): List<Pair<Class<*>, (Any) -> Unit>> {
+    return eventListenersRegistry.filter { it.second.get() == receiverObject }.map { it.first to it.third }
+  }
+
+  @Synchronized
+  fun <T: Any> list(eventClass: Class<T>, receiverObject: Any): List<(T) -> Unit> {
+    return eventListenersRegistry.filter { it.first == eventClass && it.second.get() == receiverObject }.map { it.third }
+  }
+
   /**
    * Removes from registry those listener whose receiver objects have been collected and have a null reference
    *
    * @author Cristian Velinciuc
    */
+  @Synchronized
   private fun cleanup() {
     eventListenersRegistry.removeAll { it.second.get() == null }
   }

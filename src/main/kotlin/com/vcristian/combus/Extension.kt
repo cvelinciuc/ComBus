@@ -32,6 +32,16 @@ fun <T: Any> Any.dismiss(eventClass: Class<T>) {
 }
 
 /**
+ * Unsubscribes some [receiverObject] from receiving any events and removes
+ * it's subscriptions from the registry of shared instance of [CommunicationBus]
+ *
+ * @author Cristian Velinciuc
+ */
+fun Any.dismiss() {
+  ComBus.dismiss(this)
+}
+
+/**
  * Emits the given [eventObject] to all the available listeners available in the
  * registry of the shared instance of [CommunicationBus]
  *

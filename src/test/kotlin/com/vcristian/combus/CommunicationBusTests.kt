@@ -18,9 +18,9 @@ class CommunicationBusTests {
     val receiversCount = 10
 
     val eventReceivers = Array<Receiver?>(receiversCount, { Receiver(0) })
-    val eventEmitter   = Emitter()
+    val eventEmitter = Emitter()
 
-    val expectedValuesAfterFirstPass  = receiversCount * receiversCount
+    val expectedValuesAfterFirstPass = receiversCount * receiversCount
     val expectedValuesAfterSecondPass = receiversCount * receiversCount * receiversCount
 
     eventReceivers.forEach { eventReceiver ->
@@ -49,8 +49,10 @@ class CommunicationBusTests {
       eventEmitter.emitEvent((index + 1) * (index + 1) * (index + 1))
     }
 
-    val secondPassFirstHalfResults  = eventReceivers.slice(0 until receiversCount / 2).map { it?.value ?: -1 }
-    val secondPassSecondHalfResults = eventReceivers.slice(receiversCount / 2 until receiversCount).map { it?.value ?: -1 }
+    val secondPassFirstHalfResults = eventReceivers.slice(0 until receiversCount / 2).map { it?.value ?: -1 }
+    val secondPassSecondHalfResults = eventReceivers.slice(receiversCount / 2 until receiversCount).map {
+      it?.value ?: -1
+    }
 
     assert(secondPassFirstHalfResults.all { it == -1 })
     assert(secondPassSecondHalfResults.all { it == expectedValuesAfterSecondPass })
